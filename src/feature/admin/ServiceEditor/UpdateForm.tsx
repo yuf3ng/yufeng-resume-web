@@ -17,7 +17,7 @@ export const UpdateForm = () => {
   const [models, setModels] = useState<ExtractModel<typeof service>[]>([]);
   const [activeModelIdx, setActiveModelIdx] = useState<number>(0);
   useEffect(() => {
-    service.find({}).then((values) => {
+    service.find().then((values) => {
       for (let i = 0; i < values.length; i++) {
         const model = values[i];
         if (

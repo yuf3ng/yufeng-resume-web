@@ -12,7 +12,7 @@ const EducationPage = lazy(
 );
 const PostsPage = lazy(() => import("@src/feature/post/PostsPage"));
 // const TestPage = lazy(() => import("@src/feature/test/TestPage"));
-// const AdminPage = lazy(() => import("@src/feature/admin/AdminPage"));
+const AdminPage = lazy(() => import("@src/feature/admin/AdminPage"));
 
 const router = createBrowserRouter([
   {
@@ -57,10 +57,10 @@ const router = createBrowserRouter([
           />
         ),
       },
-      // {
-      //   path: paths.admin,
-      //   element: <AdminPage />,
-      // },
+      {
+        path: paths.admin,
+        element: <AdminPage />,
+      },
       // { path: "/test", element: <TestPage /> },
     ],
   },

@@ -13,23 +13,42 @@ export const IDBProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const dbName = "api";
-    openDB<CustomDBSchemaExtended>(dbName, 1, {
+    openDB<CustomDBSchemaExtended>(dbName, 2, {
       upgrade(db, oldVersion, newVersion, transaction, event) {
-        const postStore = db.createObjectStore("posts", { keyPath: "id" });
-        postStore.createIndex("preview_id", "preview_id");
+        if (oldVersion < 1) {
+          const postStore = db.createObjectStore("posts", { keyPath: "id" });
+          postStore.createIndex("preview_id", "preview_id");
+          const previewStore = db.createObjectStore("previews", {
+            keyPath: "id",
+          });
+          previewStore.createIndex("type", "type");
+        }
 
-        const previewStore = db.createObjectStore("previews", {
-          keyPath: "id",
-        });
-        previewStore.createIndex("type", "type");
+        if (oldVersion < 2) {
+          db.clear("posts");
+          db.clear("posts-bottoms");
+          db.clear("previews");
+          db.clear("previews-bottoms");
+          const postStore = transaction.objectStore("posts");
+          postStore.createIndex("api", ["preview_id", "created_at", "id"]);
+          db.createObjectStore("posts-bottoms");
+          const previewStore = transaction.objectStore("previews");
+          previewStore.createIndex("api", ["type", "created_at", "id"]);
+          db.createObjectStore("previews-bottoms");
+        }
+
         console.log("Upgraded db");
       },
-      blocked(currentVersion, blockedVersion, event) {},
-      blocking(currentVersion, blockedVersion, event) {},
-      terminated() {},
+      blocked(currentVersion, blockedVersion, event) {
+        console.log("blocked");
+      },
+      blocking(currentVersion, blockedVersion, event) {
+        console.log("blocking");
+      },
+      terminated() {
+        console.log("terminated");
+      },
     }).then((db) => {
-      db.clear("posts");
-      db.clear("previews");
       const idbObject = new IDB();
       idbObject.db = db;
       setIDBValue(idbObject);

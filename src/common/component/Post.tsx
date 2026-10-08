@@ -91,7 +91,7 @@ const RelatedPostsButton = ({
         const postPreviewId = related_post_preview_ids[i];
         const postId = related_post_ids[i];
         postService
-          .getPartition({ preview_id: postPreviewId })
+          .findNextTopModelsPageByPartition({ preview_id: postPreviewId })
           .then((posts) => {
             for (const post of posts) {
               if (post.id === postId) {

@@ -26,7 +26,7 @@ export const AdminPage = () => {
           const results = await Promise.all(
             services.map(async (service) => [
               service.collectionName,
-              await service.find({}),
+              await service.find(),
             ]),
           );
           const jsonData = Object.fromEntries(results);

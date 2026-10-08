@@ -46,7 +46,7 @@ const postPreviewIds = {
 export const Skills = () => {
   const { postService } = useContext(APIServiceContext);
   const [activePostPreviewId, setActivePostPreviewId] = useState<string | null>(
-    null
+    null,
   );
   const [fetchingActivePosts, setFetchingActivePosts] =
     useState<boolean>(false);
@@ -55,7 +55,7 @@ export const Skills = () => {
     if (activePostPreviewId != null) {
       setFetchingActivePosts(true);
       postService
-        .getPartition({ preview_id: activePostPreviewId })
+        .findNextTopModelsPageByPartition({ preview_id: activePostPreviewId })
         .then((values) => {
           setActivePosts(values);
           setFetchingActivePosts(false);

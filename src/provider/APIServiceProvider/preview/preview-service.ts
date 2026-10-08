@@ -1,17 +1,24 @@
 import { AbstractService } from "@src/provider/APIServiceProvider/abstract-service/abstract-service";
 import { Preview } from "./preview-model";
-import { OptionalKeys } from "@src/types";
+import { Filter } from "../abstract-service/types";
 
 export class PreviewService extends AbstractService<Preview> {
-  constructor(
-    args: OptionalKeys<
-      ConstructorParameters<typeof AbstractService<Preview>>[0],
-      "collectionName" | "partitionColumns" | "clusteringColumns"
-    >,
-  ) {
-    args.collectionName = "previews2";
-    args.partitionColumns = ["type"];
-    args.clusteringColumns = ["created_at", "id"];
-    super(args as ConstructorParameters<typeof AbstractService<Preview>>[0]);
+  protected getCollectionName(): string {
+    return "previews";
+  }
+
+  protected getPartitionColumns(): (keyof Preview)[] {
+    return ["type"];
+  }
+
+  protected getClusteringColumns(): (keyof Preview)[] {
+    return ["created_at", "id"];
+  }
+
+  public getFilterForModelsEqualOrBelow(model: Preview): Filter<Preview> {
+    return {
+      type: { $eq: model.type },
+      created_at: { $lte: model.created_at },
+    } as Filter<Preview>;
   }
 }

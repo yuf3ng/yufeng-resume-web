@@ -1,15 +1,13 @@
-import { OptionalKeys } from "@src/types";
 import { Post } from "../APIServiceProvider/post/post-model";
 import { AbstractIDBService } from "./abstract-idb-service";
+import { CustomDBKeys } from "./db";
 
 export class PostIDBService extends AbstractIDBService<Post> {
-  constructor(
-    args: OptionalKeys<
-      ConstructorParameters<typeof AbstractIDBService<Post>>[0],
-      "storeName"
-    >,
-  ) {
-    args.storeName = "posts";
-    super(args as ConstructorParameters<typeof AbstractIDBService<Post>>[0]);
+  protected getStoreName(): CustomDBKeys {
+    return "posts";
+  }
+
+  protected getBottomsStoreName(): CustomDBKeys {
+    return "posts-bottoms";
   }
 }

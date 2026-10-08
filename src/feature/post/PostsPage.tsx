@@ -37,10 +37,12 @@ export const PostsPage = ({
   // Get all Preview
   const [previews, setPreviews] = useState<Preview[]>([]);
   useEffect(() => {
-    previewService.getPartition({ type }).then((values) => {
-      values.sort((a, b) => a.name.localeCompare(b.name));
-      setPreviews(values);
-    });
+    const partitionPageCursor = previewService.getPartitionPageCursor({ type });
+    partitionPageCursor
+      .initialize()
+      .then(() =>
+        partitionPageCursor.next().then((values) => setPreviews(values)),
+      );
   }, [previewService, type]);
 
   // Build a map of the achievementCategories array, mapping each value's name to its index in the array
@@ -67,16 +69,17 @@ export const PostsPage = ({
     if (activePreviewIdx != null) {
       setFetchingActivePostModels(true);
       const activePreview = previews[activePreviewIdx];
-      postService
-        .getPartition({
-          preview_id: activePreview.id,
-        })
-        .then((values) => {
-          setActivePostModels(values);
-        })
-        .finally(() => {
-          setFetchingActivePostModels(false);
-        });
+      const partitionPageCursor = postService.getPartitionPageCursor({
+        preview_id: activePreview.id,
+      });
+      partitionPageCursor.initialize().then(() =>
+        partitionPageCursor
+          .next()
+          .then((values) => setActivePostModels(values))
+          .finally(() => {
+            setFetchingActivePostModels(false);
+          }),
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activePreviewIdx]);

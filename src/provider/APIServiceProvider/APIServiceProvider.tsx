@@ -7,7 +7,6 @@ import { PreviewService } from "./preview/preview-service";
 import { PostIDBService } from "../IDBProvider/post-idb-service";
 import { PreviewIDBService } from "../IDBProvider/preview-idb-service";
 import { LoadingSpinner } from "@src/common/component/LoadingSpinner";
-import { AbstractService } from "./abstract-service/abstract-service";
 
 export type AllAPIServicesUnion = InstanceType<
   typeof APIServices
@@ -25,28 +24,31 @@ export const APIServiceProvider = ({
   children: React.ReactNode;
 }) => {
   const idbContext = useContext(IDBContext);
-  const config = useContext(ConfigContext);
+  const { api, apiToken } = useContext(ConfigContext);
+
   const [services, setServices] = useState<null | APIServices>(null);
 
   useEffect(() => {
     const db = idbContext.db;
     const services = new APIServices();
     const initializeValues = {
-      baseURL: config.api,
-      token: config.apiToken,
+      baseURL: api,
+      token: apiToken,
     };
     services.postService = new PostService({
       ...initializeValues,
-      idbService: new PostIDBService({ db }),
+      idbService: new PostIDBService({
+        db,
+      }),
     });
     services.previewService = new PreviewService({
       ...initializeValues,
-      idbService: new PreviewIDBService({ db }),
+      idbService: new PreviewIDBService({
+        db,
+      }),
     });
-    for (const service of Object.values(services)) {
-      (service as AbstractService<any, any>).syncIDB();
-    }
     setServices(services);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
