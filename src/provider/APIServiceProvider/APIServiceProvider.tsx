@@ -1,12 +1,12 @@
 import { ConfigContext } from "@src/provider/ConfigProvider";
 import { createContext, useContext, useEffect, useState } from "react";
 
+import { LoadingSpinner } from "@src/common/component/LoadingSpinner";
 import { IDBContext } from "../IDBProvider/IDBProvider";
-import { PostService } from "./post/post-service";
-import { PreviewService } from "./preview/preview-service";
 import { PostIDBService } from "../IDBProvider/post-idb-service";
 import { PreviewIDBService } from "../IDBProvider/preview-idb-service";
-import { LoadingSpinner } from "@src/common/component/LoadingSpinner";
+import { PostService } from "./post/post-service";
+import { PreviewService } from "./preview/preview-service";
 
 export type AllAPIServicesUnion = InstanceType<
   typeof APIServices
@@ -35,12 +35,13 @@ export const APIServiceProvider = ({
       baseURL: api,
       token: apiToken,
     };
-    services.postService = new PostService({
+    const postService = new PostService({
       ...initializeValues,
       idbService: new PostIDBService({
         db,
       }),
     });
+    services.postService = postService;
     services.previewService = new PreviewService({
       ...initializeValues,
       idbService: new PreviewIDBService({
@@ -48,6 +49,9 @@ export const APIServiceProvider = ({
       }),
     });
     setServices(services);
+    for (const service of Object.values(services)) {
+      service.load();
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

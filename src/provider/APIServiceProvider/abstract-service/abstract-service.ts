@@ -201,6 +201,7 @@ export abstract class AbstractService<
     }
     return results;
   }
+
   public abstract getFilterForModelsEqualOrBelow(model: M): Filter<M>;
 
   public getPartitionValues(model: Partial<M>) {
@@ -310,6 +311,24 @@ export abstract class AbstractService<
     const partitionValues = this.getPartitionValues(partition);
     return new PartitionPageCursor({ apiService: this, partitionValues });
   }
+
+  public async load() {
+    const models = await this.find({ options: { ignoreLimits: true } });
+    const grouped = Object.groupBy(models, (model) => {
+      const partitionValues: M[keyof M][] = [];
+      for (const partitionColumn of this.partitionColumns) {
+        const partitionValue = model[partitionColumn];
+        partitionValues.push(partitionValue);
+      }
+      return partitionValues.join(",");
+    });
+    for (const partition of Object.values(grouped)) {
+      if (!partition) continue;
+      this.sortPartition(partition);
+      this.upsertChainIntoIDB(partition);
+    }
+  }
+  protected abstract sortPartition(partition: M[]): M[];
 
   protected abstract getCollectionName(): string;
 
@@ -505,9 +524,6 @@ class IDBPartitionPageCursor<M extends AllModels> {
     if (nextTopIDBModel) {
       const { apiService, partitionValues, limit } = this.args;
       const clusteringValues = apiService.getClusteringValues(nextTopIDBModel);
-      console.log(partitionValues);
-      console.log(nextTopIDBModel);
-      console.log(clusteringValues);
       const range = IDBKeyRange.bound(
         [...partitionValues, MIN_DATE, MIN_STRING],
         [...partitionValues, ...clusteringValues],
